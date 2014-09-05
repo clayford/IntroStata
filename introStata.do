@@ -20,18 +20,18 @@ version 13.1
 * set working directory; sometimes easier to do first in command field
 * where you can use tab completion. Or do File...Change Working Directory. 
 * The following only works for me:
-cd "C:\Users\jcf2d\Box Sync\IntroToStata\"
+cd "C:\Users\jcf2d\Documents\_workshops\IntroToStata"
 
 * closes a log file if one is open; capture supresses error generated if no log is open 
 capture log close 
 
 * starts a log; two kinds to use: text and smcl (Stata Markup and Control Language)
 * start a smcl log named "workshop log"
-log using "09-10_log", replace name("workshop log") 
-* log using "07-16_log.log", replace  /*text log*/
+log using "log_09-10", replace name("workshop log") 
+* log using "log_09_10.log", replace  /*text log*/
 
-* Or add to previous log and give log a name
-log using "09-10_log", append name("workshop log")
+* can also add to previous log 
+* log using "log_09_10", append 
 
 *************************
 * READING AND SAVING DATA
@@ -39,8 +39,8 @@ log using "09-10_log", append name("workshop log")
 * data on newspaper subscriptions: http://guides.lib.virginia.edu/datastats/a-z
 * Alliance for Audited Media (AAM)
 
-* Stata can only have one data set loaded; specifying clear removes any
-* existing data set from memory
+* Stata can only have one data set loaded; 
+* clear removes any existing data set from memory
 
 * read in CSV file 
 * read from working directory
@@ -54,14 +54,16 @@ browse /*or click Data Editor (Browse) button*/
 * need to specify that variables are in first row:
 * varnames(1) means "variable names in first row"
 import delimited "newspapers.csv", varnames(1) clear
+* or read from the internet:
 import delimited "http://people.virginia.edu/~jcf2d/workshops/Stata/newspapers.csv", ///
 	varnames(1) clear
 
 * read in tab delimited file with delimiter(tab) option
 * submit command "help import" for an overview of importing data into Stata
 
-* NOTE: prior versions of Stata used insheet; it continues to work but 
-* as of Stata 13 is no longer an official part of Stata.
+* NOTE: prior versions of Stata used insheet; 
+* insheet using newspapers.csv, names clear
+* it continues to work but as of Stata 13 is no longer an official part of Stata.
 
 * save imported data as Stata data file with .dta extension
 save "newspapers", replace
@@ -93,7 +95,7 @@ list in 1/10
 * see from record 2000 to the end
 list in 2000/l //that's a lower case L, not the number one//
 * see publications in Virginia
-list publicationname if State=="VA"
+list publicationname if state=="VA"
 
 * rename variables: rename old new
 rename city City
@@ -109,7 +111,7 @@ list SunSat Weekday in 1/10
 
 * convert numbers to numeric using destring (remove commas and convert to numeric)
 * ignore (,) means delete the comma; replace means replace the character value 
-* with a numeric value; must specify generate or replace
+* with a numeric value;
 destring SunSat Weekday, ignore(,) replace 
 list SunSat Weekday in 1/10
 describe SunSat Weekday
@@ -119,12 +121,14 @@ describe SunSat Weekday
 
 * see records missing both SunSat and Weekday
 list if SunSat ==. & Weekday == . 
-* keep records with either SunSat or Weekday present
-keep if SunSat !=. | Weekday != . 
 
 * misstable command nice for investigating missingness
 misstable summarize (SunSat Weekday)
-misstable patterns (SunSat Weekday)
+misstable pattern (SunSat Weekday), frequency 
+
+* keep records with either SunSat not missing or Weekday not missing
+keep if SunSat !=. | Weekday != . 
+* drop if SunSat ==. & Weekday == . /*same thing*/
 
 * generating and replacing variables
 * generate an ID number
@@ -152,9 +156,9 @@ egen stdSunSat = std(SunSat)
 
 * note the reportdate: it has AR appended to it (AR = Audited Report)
 * let's create two new variables: report month, report year
-* have to use replace or generate; substr(var, start position, length)
-generate reportmonth=substr(reportdate,1,2)
-generate reportyear=substr(reportdate,4,4)
+* substr(var, start position, length)
+generate reportmonth = substr(reportdate,1,2)
+generate reportyear = substr(reportdate,4,4)
 
 * let's drop the reportdate variable
 drop reportdate
@@ -163,18 +167,20 @@ drop reportdate
 sort State 
 * sort data by state then by type
 sort State Type
-* sort Weekday circulation descending and see the first 5
+* sort by Weekday circulation descending and see the first 5
 * use gsort to sort descending; add - to variable to indicate descending
 gsort -Weekday
 list publicationname Weekday in 1/5
 
 
 * can label variables and data set
+describe
 label variable State "US states and Canadian provinces and territories"
 label data "Newspaper data obtained from Alliance for Audited Media (AAM)"
+describe
 
 * can add notes to data 
-note: This data was downloaded from http://www.auditedmedia.com/
+notes: This data was downloaded from http://www.auditedmedia.com/
 
 * can add notes to variables; use /// to continue command across line breaks
 notes Type:  BE = Branded Edition, CND = Community Daily Newspaper, ///
