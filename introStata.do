@@ -15,6 +15,7 @@
 * older versions might stop working.
 * To prevent that from happening, specify the version of Stata that you are 
 * using at the top of do-files:
+
 version 13.1
 
 * set working directory; sometimes easier to do first in command field
@@ -26,8 +27,8 @@ cd "C:\Users\jcf2d\Documents\_workshops\IntroToStata"
 capture log close 
 
 * starts a log; two kinds to use: text and smcl (Stata Markup and Control Language)
-* start a smcl log named "workshop log"
-log using "log_09-10", replace name("workshop log") 
+* start a smcl log named "workshopLog"
+log using "log_09-10", replace name(workshopLog) 
 * log using "log_09_10.log", replace  /*text log*/
 
 * can also add to previous log 
@@ -42,7 +43,7 @@ log using "log_09-10", replace name("workshop log")
 * Stata can only have one data set loaded; 
 * clear removes any existing data set from memory
 
-* read in CSV file 
+* reading in CSV files 
 * read from working directory
 import delimited "newspapers.csv", clear
 * read from internet
@@ -202,10 +203,15 @@ tabulate State Type
 tabulate State Type, row
 tab reportmonth reportyear, column
 tab reportmonth reportyear if Weekday > 100000, column
+* tabulate over subsets
+bysort Type: tabulate reportyear
 
 * numeric variables 
 summarize SunSat
 summ SunSat, detail
+* summarize over subsets
+bysort Type: summarize SunSat
+* multiple variables and conditions
 summarize SunSat Weekday 
 summarize SunSat if State=="VA"
 summarize SunSat if State=="CA" & Type=="DLY"
@@ -266,7 +272,7 @@ graph bar (count) id, over(Type)
 * box plots
 graph box SunSat, over(Type)
 graph box SunSat if State=="VA", over(Type)
-* omit the empty category
+* omit the empty category with the nofill option
 graph box SunSat if State=="VA", over(Type) nofill
 
 * scatter plot
@@ -320,6 +326,8 @@ list
 
 * mean of mpg for each level of treated
 tabulate treated, summarize(mpg)
+* or use bysort
+bysort treated: summarize(mpg)
 * or use the mean command
 mean mpg, over(treated)
 * visualize
@@ -336,7 +344,7 @@ help anova
 help oneway
 
 * load data from Stata web site and examine
-webuse systolic
+webuse systolic, clear
 describe
 list
 
@@ -378,5 +386,10 @@ twoway (scatter mpg weight) (line yhat weight, sort)
 * plot residuals versus predicted values; rvf = residuals vs. fitted
 rvfplot
 
+
+* Clay: show demo of executing do files without opening
+* data prep: prepNPData
+* data analysis: analyzeNPData
+
 * end do file with 
-log close
+log close workshopLog
