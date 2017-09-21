@@ -4,6 +4,11 @@
 *StatLab@UVa Library
 *Clay Ford
 *************************
+*September 21 2017
+*Adam Ross Nelson @adamrossnelson
+*Added option to load data from GitHub.com
+*Also modified to use -window fsave- instead of saving to working dir.
+*************************
 
 * use Ctrl+D to submit commands or click the Execute button;
 * green text preceded with asterisks are comments.
@@ -20,15 +25,21 @@ version 13.1
 
 * set working directory; sometimes easier to do first in command field
 * where you can use tab completion. Or do File...Change Working Directory. 
-* The following only works for me:
-cd "C:\Users\jcf2d\Documents\_workshops\IntroToStata"
+* The following is an example that works with original versions:
+* Adding interactivity with -window fsave- does not require setting working dir.
+// cd "C:\Users\jcf2d\Documents\_workshops\IntroToStata"
 
 * closes a log file if one is open; capture supresses error generated if no log is open 
 capture log close 
 
 * starts a log; two kinds to use: text and smcl (Stata Markup and Control Language)
 * start a smcl log named "workshopLog"
-log using "log_09-10", replace name(workshopLog) 
+// log using "log_09-10", replace name(workshopLog) 
+global logmacro = "LogFileName.log"
+capture window fsave logmacro "What logfile name would you liek to use?" "*.log"
+di "$logmacro"
+log useing "$logmacro", replace
+//log using "log_09-10", replace
 * log using "log_09_10.log", replace  /*text log*/
 
 * can also add to previous log 
@@ -45,9 +56,12 @@ log using "log_09-10", replace name(workshopLog)
 
 * reading in CSV files 
 * read from working directory
-import delimited "newspapers.csv", clear
+* removing local option in favor of interactive upgrades.
+// import delimited "newspapers.csv", clear
 * read from internet
 import delimited "http://people.virginia.edu/~jcf2d/workshops/Stata/newspapers.csv", clear
+* read from GitHub.com
+import delimited "https://raw.githubusercontent.com/clayford/IntroStata/master/newspapers.csv", clear
 
 * take a look at data:
 browse /*or click Data Editor (Browse) button*/
@@ -67,14 +81,19 @@ import delimited "http://people.virginia.edu/~jcf2d/workshops/Stata/newspapers.c
 * it continues to work but as of Stata 13 is no longer an official part of Stata.
 
 * save imported data as Stata data file with .dta extension
-save "newspapers", replace
+// save "newspapers", replace
 * use "replace" option to overwrite existing file
+* begin update for -window fsave* edits
+global dtamacro = "DataFileName.dta"
+capture window fsave dtamacro "DATA FILE SAVE: Please choose a file name and location." "*.dta"
+di "$dtamacro"
+save "$dtamacro", replace
 
 * how to clear data
 clear
 
 * read in Stata data with the use command
-use newspapers, clear
+use "$dtamacro", clear
 
 * can also enter/edit data in by hand using data editor (not recommended)
 
@@ -305,8 +324,12 @@ graph twoway (scatter WeekdayK SunSatK) (lfit WeekdayK SunSatK) ///
 	subtitle("Thousands of subscribers")
 
 * save graph as high-res image file; see "help graph export"
-graph export figure1.tif
-
+// graph export figure1.tif
+* begin update for -window fsave* edits
+global imgmacro = "ImageFileName.tif"
+capture window fsave imgmacro "IMAGE FILE SAVE: Please choose a file name and location." "*.tif"
+di "$imgmacro"
+graph export "$imgmacro", replace
 
 *************************
 * BASIC STATISTICS
@@ -392,4 +415,4 @@ rvfplot
 * data analysis: analyzeNPData
 
 * end do file with 
-log close workshopLog
+log close
